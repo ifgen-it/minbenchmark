@@ -8,7 +8,8 @@ import lombok.experimental.FieldDefaults;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Accessors(chain = true)
-public class ColumnDto {
-    String title;
+public class Field {
+    String field;
     String type;
+    String key;
 }
