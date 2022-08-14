@@ -16,6 +16,15 @@ show columns from customer
 show tables
 
 --
+DROP TABLE customer
+
+--
+create TABLE IF NOT EXISTS query (
+    queryId integer PRIMARY key,
+    tableName varchar(100),
+    query varchar(300))
+
+--
 
 
 

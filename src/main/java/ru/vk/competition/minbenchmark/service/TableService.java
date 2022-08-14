@@ -44,7 +44,6 @@ public class TableService {
     }
 
     public Optional<TableDto> getTableStructure(String tableName) {
-        tableName = tableName.trim();
         if (!tableRepository.existsTable(tableName)) {
             return Optional.empty();
         }
@@ -70,6 +69,15 @@ public class TableService {
 
         return Optional.of(table);
     }
+
+    public Optional<Boolean> deleteTable(String tableName) {
+        if (!tableRepository.existsTable(tableName)) {
+            return Optional.empty();
+        }
+        tableRepository.deleteTable(tableName);
+        return Optional.of(true);
+    }
+
     private String getCreateTableEnd() {
         return ")";
     }
@@ -85,4 +93,6 @@ public class TableService {
     private String getCreateTableBegin(String tableName) {
         return "create table " + tableName + " (";
     }
+
+
 }

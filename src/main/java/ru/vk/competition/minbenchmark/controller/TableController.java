@@ -4,7 +4,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.vk.competition.minbenchmark.dto.TableDto;
@@ -18,21 +17,20 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class TableController {
-
-    static Integer OK = 201;
-    static Integer FAIL = 406;
+    static Integer CODE_201 = 201;
+    static Integer CODE_406 = 406;
 
     private final TableService tableService;
 
     @PostMapping("/create-table")
-    public ResponseEntity<Integer> createTable(@RequestBody TableDto tableDto) {
+    public ResponseEntity<?> createTable(@RequestBody TableDto tableDto) {
         try {
             tableService.createTable(tableDto);
+            return ResponseEntity.status(CODE_201).build();
         } catch (Exception ex) {
             ex.printStackTrace();
-            return ResponseEntity.status(FAIL).body(FAIL);
+            return ResponseEntity.status(CODE_406).build();
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(OK);
     }
 
     @GetMapping("/get-table-by-name/{name}")
@@ -40,12 +38,26 @@ public class TableController {
         try {
             Optional<TableDto> tableOpt = tableService.getTableStructure(tableName);
             if (tableOpt.isEmpty())
-                return ResponseEntity.status(HttpStatus.OK).build();
+                return ResponseEntity.status(CODE_201).build();
             else
-                return ResponseEntity.status(HttpStatus.OK).body(tableOpt.get());
+                return ResponseEntity.status(CODE_201).body(tableOpt.get());
         } catch (Exception ex) {
             ex.printStackTrace();
-            return ResponseEntity.status(FAIL).build();
+            return ResponseEntity.status(CODE_406).build();
+        }
+    }
+
+    @DeleteMapping("/drop-table-by-name/{name}")
+    public ResponseEntity<?> deleteTable(@PathVariable(name = "name") String tableName) {
+        try {
+            Optional<Boolean> resultOpt = tableService.deleteTable(tableName);
+            if (resultOpt.isPresent() && Boolean.TRUE.equals(resultOpt.get()))
+                return ResponseEntity.status(CODE_201).build();
+            else
+                return ResponseEntity.status(CODE_406).build();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return ResponseEntity.status(CODE_406).build();
         }
     }
 }

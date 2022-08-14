@@ -18,6 +18,7 @@ public class TableRepository {
 
     static String ALL_TABLES = "show tables";
     static String TABLE_STRUCTURE = "show columns from :table_name";
+    static String DELETE_TABLE = "DROP TABLE :table_name";
 
     JdbcTemplate jdbcTemplate;
     // NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -32,6 +33,7 @@ public class TableRepository {
     }
 
     public Boolean existsTable(@NonNull String tableName) {
+        tableName = tableName.toUpperCase();
         Set<String> tableNames = new HashSet<>();
         jdbcTemplate.query(ALL_TABLES, (rs, rn) -> {
             String table = rs.getString("table_name");
@@ -48,6 +50,16 @@ public class TableRepository {
                 .setField(rs.getString("field"))
                 .setType(rs.getString("type"))
                 .setKey(rs.getString("key")));
+    }
+
+    public void deleteTable(String tableName) {
+        Map<String, String> params = Map.of("table_name", tableName);
+        String query = DbUtils.substituteParams(DELETE_TABLE, params);
+        jdbcTemplate.execute(query);
+    }
+
+    public void executeQuery(@NonNull String query) {
+        jdbcTemplate.execute(query);
     }
 
     // не работает подстановка параметров
