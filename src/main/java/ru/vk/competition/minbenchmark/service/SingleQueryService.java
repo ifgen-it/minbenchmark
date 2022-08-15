@@ -1,101 +1,74 @@
 package ru.vk.competition.minbenchmark.service;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import ru.vk.competition.minbenchmark.entity.SingleQuery;
+import org.springframework.transaction.annotation.Transactional;
+import ru.vk.competition.minbenchmark.dto.SingleQueryDto;
+import ru.vk.competition.minbenchmark.entity.SingleQueryEntity;
+import ru.vk.competition.minbenchmark.mapper.SingleQueryMapper;
 import ru.vk.competition.minbenchmark.repository.SingleQueryRepository;
+import ru.vk.competition.minbenchmark.repository.TableRepository;
 
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class SingleQueryService {
+    TableRepository tableRepository;
+    SingleQueryRepository singleQueryRepository;
+    SingleQueryMapper singleQueryMapper;
 
-    private final SingleQueryRepository queryRepository;
-
-    public SingleQuery getAllQueries() {
-
-        return null;
-        /*return Mono.fromCallable(queryRepository::findAll)
-                .publishOn(Schedulers.boundedElastic())
-                .flatMapIterable(x -> x);*/
+    public void saveSingleQuery(SingleQueryDto singleQuery) {
+        singleQueryRepository.save(singleQueryMapper.toEntity(singleQuery));
     }
 
-    public SingleQuery getQueryById(Integer id) {
-
-        return null;
-        /*return Mono.fromCallable(() -> queryRepository.findByQueryId(id).orElseThrow(() -> new RuntimeException(
-                String.format("Cannot find tableQuery by Id %s", id.toString())
-        ))).publishOn(Schedulers.boundedElastic());*/
+    public void modifySingleQuery(SingleQueryDto singleQuery) {
+        singleQueryRepository.findById(singleQuery.getQueryId())
+                .ifPresentOrElse(singleQueryEntity -> {
+                            singleQueryEntity.setQuery(singleQuery.getQuery());
+                            singleQueryRepository.save(singleQueryEntity);
+                        },
+                        () -> {
+                            throw new IllegalArgumentException("Запроса с таким id не существует");
+                        });
     }
 
-    public ResponseEntity<Void> deleteQueryById(Integer id) {
-
-        return null;
-        /*return Mono.fromCallable(() -> {
-            try {
-                if(queryRepository.findByQueryId(id).map(SingleQuery::getQueryId).isEmpty()) {
-                    return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
-                } else {
-                    queryRepository.deleteByQueryId(id);
-                    return new ResponseEntity<Void>(HttpStatus.ACCEPTED);
-                }
-            } catch (Exception e) {
-                return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
-            }
-        }).publishOn(Schedulers.boundedElastic());*/
+    public void deleteSingleQuery(Integer id) {
+        singleQueryRepository.findById(id)
+                .ifPresentOrElse(singleQueryRepository::delete, () -> {
+                    throw new IllegalArgumentException("Запроса с таким id не существует");
+                });
     }
 
-    public ResponseEntity<Void> addQueryWithQueryId(SingleQuery singleQuery) {
-
-        return null;
-        /*return Mono.fromCallable(() -> {
-            queryRepository.save(singleQuery);
-            return new ResponseEntity<Void>(HttpStatus.CREATED);
-        }).publishOn(Schedulers.boundedElastic());*/
+    public void executeSingleQuery(Integer id) {
+        singleQueryRepository.findById(id)
+                .ifPresentOrElse(singleQueryEntity -> {
+                            try {
+                                tableRepository.executeQuery(singleQueryEntity.getQuery());
+                            } catch (Exception ex) {
+                                throw new RuntimeException("Синтаксис запроса неверный");
+                            }
+                        },
+                        () -> {
+                            throw new IllegalArgumentException("Запроса с таким id не существует");
+                        });
     }
 
-    public ResponseEntity<Void> updateQueryWithQueryId(SingleQuery singleQuery) {
-
-        return null;
-        /*return Mono.fromCallable(() -> {
-            queryRepository.findByQueryId(singleQuery.getQueryId())
-                    .orElseThrow(() -> new RuntimeException(
-                            String.format("Cannot find tableQuery by ID %s", singleQuery.getQueryId())
-                    ));
-            queryRepository.save(singleQuery);
-            return ResponseEntity.<Void>ok(null);
-        }).publishOn(Schedulers.boundedElastic());*/
+    public SingleQueryDto getSingleQueryById(Integer id) {
+        Optional<SingleQueryEntity> singleQueryEntityOpt = singleQueryRepository.findById(id);
+        if (singleQueryEntityOpt.isEmpty())
+            throw new IllegalArgumentException("Запроса с таким id не существует");
+        return singleQueryMapper.toDto(singleQueryEntityOpt.get());
     }
 
-    public ResponseEntity<Void> executeSingleQuery(Integer id) {
-
-
-        return null;
-        /*return Mono.fromCallable(() -> {
-            Connection connection = null;
-            Statement statement = null;
-            Optional<String> createSql = null;
-            try {
-                Class.forName("org.postgresql.Driver");
-                connection = DriverManager.getConnection(
-                        "jdbc:postgresql://localhost:5432/postgres",
-                        "postgres",
-                        "123"
-                );
-                log.debug("Database connected hahaha....");
-                statement = connection.createStatement();
-                createSql = queryRepository.findByQueryId(id).map(SingleQuery::getQuery);
-                statement.execute(createSql.get());
-                statement.close();
-                connection.close();
-                return new ResponseEntity<Void>(HttpStatus.CREATED);
-            } catch (Exception e) {
-                System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-                return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
-            }
-        }).publishOn(Schedulers.boundedElastic());*/
+    public List<SingleQueryDto> getAllSingleQueries() {
+        return singleQueryMapper.toDto(singleQueryRepository.findAll());
     }
 }

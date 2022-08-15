@@ -17,6 +17,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class TableController {
+    static Integer CODE_200 = 200;
     static Integer CODE_201 = 201;
     static Integer CODE_406 = 406;
 
@@ -38,16 +39,16 @@ public class TableController {
         try {
             Optional<TableDto> tableOpt = tableService.getTableStructure(tableName);
             if (tableOpt.isEmpty())
-                return ResponseEntity.status(CODE_201).build();
+                return ResponseEntity.status(CODE_200).build();
             else
-                return ResponseEntity.status(CODE_201).body(tableOpt.get());
+                return ResponseEntity.status(CODE_200).body(tableOpt.get());
         } catch (Exception ex) {
             ex.printStackTrace();
             return ResponseEntity.status(CODE_406).build();
         }
     }
 
-    @DeleteMapping("/drop-table-by-name/{name}")
+    @DeleteMapping("/drop-table/{name}")
     public ResponseEntity<?> deleteTable(@PathVariable(name = "name") String tableName) {
         try {
             Optional<Boolean> resultOpt = tableService.deleteTable(tableName);

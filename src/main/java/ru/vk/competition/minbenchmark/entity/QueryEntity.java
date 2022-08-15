@@ -19,9 +19,9 @@ import javax.persistence.Table;
 @Accessors(chain = true)
 public class QueryEntity {
     @Id
-    @Column(name = "queryid")
+    @Column(name = "query_id")
     Integer id;
-    @Column(name = "tablename")
+    @Column(name = "table_name")
     String tableName;
     @Column(name = "query")
     String query;

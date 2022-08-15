@@ -26,7 +26,12 @@ public class TableService {
     TableRepository tableRepository;
 
     public void createTable(TableDto table) {
-
+        if (tableRepository.existsTable(table.getTableName())) {
+            throw new IllegalArgumentException("Таблица с таким именем уже существует");
+        }
+        if (!table.getColumnsAmount().equals(table.getColumnInfos().size())) {
+            throw new IllegalArgumentException("Несоответствие количества атрибутов в таблице");
+        }
         StringBuilder queryBuilder = new StringBuilder();
         queryBuilder.append(getCreateTableBegin(table.getTableName()));
 
@@ -40,7 +45,6 @@ public class TableService {
 
         String query = queryBuilder.toString();
         tableRepository.createTable(query);
-
     }
 
     public Optional<TableDto> getTableStructure(String tableName) {

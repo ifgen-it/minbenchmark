@@ -1,17 +1,14 @@
 package ru.vk.competition.minbenchmark.repository;
 
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-import ru.vk.competition.minbenchmark.entity.SingleQuery;
+import org.springframework.data.jpa.repository.JpaRepository;
+import ru.vk.competition.minbenchmark.entity.SingleQueryEntity;
 
+import java.util.List;
 import java.util.Optional;
 
-@Repository
-public interface SingleQueryRepository extends CrudRepository<SingleQuery, String> {
+public interface SingleQueryRepository extends JpaRepository<SingleQueryEntity, Integer> {
 
-    Optional<SingleQuery> findByQueryId(Integer id);
+    Optional<SingleQueryEntity> findById(Integer id);
 
-    @Transactional
-    void deleteByQueryId(Integer id);
+    List<SingleQueryEntity> findAll();
 }
