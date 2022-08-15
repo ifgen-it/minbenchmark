@@ -34,25 +34,36 @@ public class ReportService {
     ReportRepository reportRepository;
     TableRepository tableRepository;
     ReportMapper reportMapper;
+    TypeMappingService typeMappingService;
 
     public void createReport(ReportDto report) {
-        if (!report.getTableAmount().equals(report.getTables().size()))
+        if (!report.getTableAmount().equals(report.getTables().size())) {
+            log.error("tableAmount не совпадает с кол-вом таблиц в списке tables");
             throw new IllegalArgumentException("tableAmount не совпадает с кол-вом таблиц в списке tables");
+        }
 
         reportRepository.findById(report.getReportId()).ifPresent(
-                reportEntity -> {throw new IllegalArgumentException("Отчет с таким reportId уже существует: " + report.getReportId());}
+                reportEntity -> {
+                    log.error("Отчет с таким reportId уже существует: " + report.getReportId());
+                    throw new IllegalArgumentException("Отчет с таким reportId уже существует: " + report.getReportId());
+                }
         );
         validateTables(report.getTables());
 
         // сохраняем репорт
+        log.info("Начинаем сохранять отчет reportId = " + report.getReportId());
         ReportEntity reportEntity = createReportEntity(report);
         reportRepository.save(reportEntity);
+        log.info("Отчет сохранен");
     }
 
     public ReportDto getReportById(Integer id) {
         Optional<ReportEntity> reportEntityOpt = reportRepository.findById(id);
-        if (reportEntityOpt.isEmpty())
-            throw new RuntimeException("Отчет с таким reportId не существует: " + id);
+        if (reportEntityOpt.isEmpty()) {
+            String errorMessage ="Отчет с таким reportId не существует: " + id;
+            log.error(errorMessage);
+            throw new RuntimeException(errorMessage);
+        }
 
         ReportEntity reportEntity = reportEntityOpt.get();
         return createReportDto(reportEntity);
@@ -69,7 +80,7 @@ public class ReportService {
             String tableName = table.getTableName();
             if (!tableRepository.existsTable(tableName))
                 throw new IllegalArgumentException("Таблица с таким именем не существует: " + tableName);
-            Integer size = tableRepository.getRowCountByTable(tableName);
+            Long size = tableRepository.getRowCountByTable(tableName);
 
             for (ReportColumnDto column : table.getColumns())
                 column.setSize(size.toString());
@@ -95,7 +106,9 @@ public class ReportService {
         for (ReportTableDto table : tables) {
             String tableName = table.getTableName();
             if (!tableRepository.existsTable(tableName)) {
-                throw new IllegalArgumentException("Таблица с таким именем не существует: " + tableName);
+                String errorMessage = "Создание отчета: таблица с таким именем не существует: " + tableName;
+                log.error(errorMessage);
+                throw new IllegalArgumentException(errorMessage);
             }
             validateColumns(tableName, table.getColumns());
         }
@@ -108,13 +121,25 @@ public class ReportService {
 
         for (ReportColumnDto column : columns) {
             String columnTitle = column.getTitle().toUpperCase();
-            if (!fieldByName.containsKey(columnTitle))
-                throw new IllegalArgumentException("Колонки с таким именем не существует: " + column.getTitle());
+            if (!fieldByName.containsKey(columnTitle)) {
+                String errorMessage = "Создание отчета: колонки с таким именем не существует: " + column.getTitle();
+                log.error(errorMessage);
+                throw new IllegalArgumentException(errorMessage);
+            }
 
             Field field = fieldByName.get(columnTitle);
-            if (!field.getType().equalsIgnoreCase(column.getType()))
-                throw new IllegalArgumentException("Неверный тип колонки: " + column.getType()
-                        + ". В БД у колонки тип такой: " + field.getType());
+            if (!areTypesEqual(field.getType(), column.getType())) {
+                String errorMessage = "Неверный тип колонки: " + column.getType()
+                        + ". В БД у колонки тип такой: " + field.getType();
+                log.error(errorMessage);
+                throw new IllegalArgumentException(errorMessage);
+            }
         }
+    }
+
+    private boolean areTypesEqual(String dbType, String type) {
+        if (dbType.equalsIgnoreCase(type))
+            return true;
+        return typeMappingService.hasMapping(dbType, type);
     }
 }

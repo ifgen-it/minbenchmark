@@ -27,9 +27,10 @@ public class TableController {
     public ResponseEntity<?> createTable(@RequestBody TableDto tableDto) {
         try {
             tableService.createTable(tableDto);
+            tableService.updateTypeMapping(tableDto);
             return ResponseEntity.status(CODE_201).build();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception in createTable: {}", ex.getLocalizedMessage());
             return ResponseEntity.status(CODE_406).build();
         }
     }
@@ -43,7 +44,7 @@ public class TableController {
             else
                 return ResponseEntity.status(CODE_200).body(tableOpt.get());
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception in getTableStructure: {}", ex.getLocalizedMessage());
             return ResponseEntity.status(CODE_406).build();
         }
     }
@@ -57,7 +58,7 @@ public class TableController {
             else
                 return ResponseEntity.status(CODE_406).build();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception in deleteTable: {}", ex.getLocalizedMessage());
             return ResponseEntity.status(CODE_406).build();
         }
     }

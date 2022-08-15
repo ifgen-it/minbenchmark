@@ -26,7 +26,7 @@ public class ReportController {
             reportService.createReport(report);
             return ResponseEntity.status(CODE_201).build();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception in createReport: {}", ex.getLocalizedMessage());
             return ResponseEntity.status(CODE_406).build();
         }
     }
@@ -37,7 +37,7 @@ public class ReportController {
             ReportDto report = reportService.getReportById(id);
             return ResponseEntity.status(CODE_201).body(report);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception in getReport: {}", ex.getLocalizedMessage());
             return ResponseEntity.status(CODE_406).build();
         }
     }

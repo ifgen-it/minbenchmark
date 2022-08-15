@@ -12,8 +12,10 @@ import ru.vk.competition.minbenchmark.dto.TableDto;
 import ru.vk.competition.minbenchmark.repository.TableRepository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 public class TableService {
 
     TableRepository tableRepository;
+    TypeMappingService typeMappingService;
 
     public void createTable(TableDto table) {
         if (tableRepository.existsTable(table.getTableName())) {
@@ -45,6 +48,23 @@ public class TableService {
 
         String query = queryBuilder.toString();
         tableRepository.createTable(query);
+    }
+
+    public void updateTypeMapping(TableDto table) {
+        TableDto savedTable = getTableStructure(table.getTableName())
+                .orElseThrow(() -> new RuntimeException("Ошибка в методе updateTypeMapping: таблица была сохранена, но теперь не найдена"));
+
+        Map<String, ColumnDto> originColumnsByTitle =  table.getColumnInfos().stream()
+                .collect(Collectors.toMap(column -> column.getTitle().toUpperCase(), Function.identity()));
+
+        for (ColumnDto columnDto : savedTable.getColumnInfos()) {
+            String title = columnDto.getTitle().toUpperCase();
+            String dbType = columnDto.getType();
+            if (originColumnsByTitle.containsKey(title)) {
+                String type = originColumnsByTitle.get(title).getType();
+                typeMappingService.addMapping(dbType, type);
+            }
+        }
     }
 
     public Optional<TableDto> getTableStructure(String tableName) {

@@ -27,23 +27,23 @@ public class SingleQueryController {
     SingleQueryService singleQueryService;
 
     @PostMapping("/add-new-query")
-    public ResponseEntity<?> addNewQuery(@RequestBody SingleQueryDto singleQuery) {
+    public ResponseEntity<?> addNewSingleQuery(@RequestBody SingleQueryDto singleQuery) {
         try {
             singleQueryService.saveSingleQuery(singleQuery);
             return ResponseEntity.status(CODE_201).build();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception in addNewSingleQuery: {}", ex.getLocalizedMessage());
             return ResponseEntity.status(CODE_400).build();
         }
     }
 
     @PutMapping("/modify-single-query")
-    public ResponseEntity<?> modifyQueryInTable(@RequestBody SingleQueryDto singleQuery) {
+    public ResponseEntity<?> modifySingleQuery(@RequestBody SingleQueryDto singleQuery) {
         try {
             singleQueryService.modifySingleQuery(singleQuery);
             return ResponseEntity.status(CODE_200).build();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception in modifySingleQuery: {}", ex.getLocalizedMessage());
             return ResponseEntity.status(CODE_406).build();
         }
     }
@@ -54,7 +54,7 @@ public class SingleQueryController {
             singleQueryService.deleteSingleQuery(id);
             return ResponseEntity.status(CODE_202).build();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception in deleteSingleQuery: {}", ex.getLocalizedMessage());
             return ResponseEntity.status(CODE_406).build();
         }
     }
@@ -65,18 +65,18 @@ public class SingleQueryController {
             singleQueryService.executeSingleQuery(id);
             return ResponseEntity.status(CODE_201).build();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception in executeSingleQuery: {}", ex.getLocalizedMessage());
             return ResponseEntity.status(CODE_406).build();
         }
     }
 
     @GetMapping("/get-single-query-by-id/{id}")
-    public ResponseEntity<SingleQueryDto> getTableQueryById(@PathVariable(name = "id") Integer id) {
+    public ResponseEntity<SingleQueryDto> getSingleQueryById(@PathVariable(name = "id") Integer id) {
         try {
             SingleQueryDto singleQuery = singleQueryService.getSingleQueryById(id);
             return ResponseEntity.status(CODE_200).body(singleQuery);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception in getSingleQueryById: {}", ex.getLocalizedMessage());
             return ResponseEntity.status(CODE_500).build();
         }
     }
@@ -87,7 +87,7 @@ public class SingleQueryController {
             List<SingleQueryDto> singleQueries = singleQueryService.getAllSingleQueries();
             return ResponseEntity.status(CODE_200).body(singleQueries);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception in getAllSingleQueries: {}", ex.getLocalizedMessage());
             return ResponseEntity.status(CODE_200).build();
         }
     }

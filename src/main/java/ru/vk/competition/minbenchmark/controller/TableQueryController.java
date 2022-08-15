@@ -31,7 +31,7 @@ public class TableQueryController {
             tableQueryService.saveQuery(tableQuery);
             return ResponseEntity.status(CODE_201).build();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception in addNewQuery: {}", ex.getLocalizedMessage());
             return ResponseEntity.status(CODE_406).build();
         }
     }
@@ -42,7 +42,7 @@ public class TableQueryController {
             tableQueryService.modifyQuery(tableQuery);
             return ResponseEntity.status(CODE_200).build();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception in modifyQuery: {}", ex.getLocalizedMessage());
             return ResponseEntity.status(CODE_406).build();
         }
     }
@@ -53,7 +53,7 @@ public class TableQueryController {
             tableQueryService.deleteQuery(id);
             return ResponseEntity.status(CODE_202).build();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception in deleteQuery: {}", ex.getLocalizedMessage());
             return ResponseEntity.status(CODE_406).build();
         }
     }
@@ -64,7 +64,7 @@ public class TableQueryController {
             tableQueryService.executeQuery(id);
             return ResponseEntity.status(CODE_201).build();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception in executeQuery: {}", ex.getLocalizedMessage());
             return ResponseEntity.status(CODE_406).build();
         }
     }
@@ -75,7 +75,7 @@ public class TableQueryController {
             List<TableQueryDto> queries = tableQueryService.getQueriesByTable(tableName);
             return ResponseEntity.status(CODE_200).body(queries);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception in getQueriesByTable: {}", ex.getLocalizedMessage());
             return ResponseEntity.status(CODE_200).build();
         }
     }
@@ -86,7 +86,7 @@ public class TableQueryController {
             TableQueryDto query = tableQueryService.getQueryById(id);
             return ResponseEntity.status(CODE_200).body(query);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception in getQueryById: {}", ex.getLocalizedMessage());
             return ResponseEntity.status(CODE_500).build();
         }
     }
@@ -97,7 +97,7 @@ public class TableQueryController {
             List<TableQueryDto> queries = tableQueryService.getAllQueries();
             return ResponseEntity.status(CODE_200).body(queries);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception in getAllQueries: {}", ex.getLocalizedMessage());
             return ResponseEntity.status(CODE_200).build();
         }
     }

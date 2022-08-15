@@ -63,10 +63,10 @@ public class TableRepository {
         jdbcTemplate.execute(query);
     }
 
-    public Integer getRowCountByTable(String tableName) {
+    public Long getRowCountByTable(String tableName) {
         Map<String, String> params = Map.of("table_name", tableName);
         String query = DbUtils.substituteParams(ROW_COUNT, params);
-        return jdbcTemplate.queryForObject(query, Integer.class);
+        return jdbcTemplate.queryForObject(query, Long.class);
     }
 
     // не работает подстановка параметров
