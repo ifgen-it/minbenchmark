@@ -19,6 +19,7 @@ public class TableRepository {
     static String ALL_TABLES = "show tables";
     static String TABLE_STRUCTURE = "show columns from :table_name";
     static String DELETE_TABLE = "DROP TABLE :table_name";
+    static String ROW_COUNT = "SELECT count(*) row_count FROM :table_name";
 
     JdbcTemplate jdbcTemplate;
     // NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -60,6 +61,12 @@ public class TableRepository {
 
     public void executeQuery(@NonNull String query) {
         jdbcTemplate.execute(query);
+    }
+
+    public Integer getRowCountByTable(String tableName) {
+        Map<String, String> params = Map.of("table_name", tableName);
+        String query = DbUtils.substituteParams(ROW_COUNT, params);
+        return jdbcTemplate.queryForObject(query, Integer.class);
     }
 
     // не работает подстановка параметров
